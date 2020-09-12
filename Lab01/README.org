@@ -1,0 +1,356 @@
+#+TITLE: Lab 01: Hello World, Basic I/O, and Vectors
+
+* Overview
+
+This lab covers an introduction to the development environment and exercises involving the ~std::vector~ type and basic input 
+and output (I/O).
+
+* The Development Environment
+
+For CSC 116, we will be using the *Ubuntu Linux environment only* which is provided to you online by ITSupport via SSH and SFTP protocols to ~linux.csc.uvic.ca~. This machine is the gold standard for assignments, so you should ensure that all of your assignment code runs correctly on this machine before submitting. If your code does not compile in this environment, it will not be marked.
+
+When you log in to this machine, your personal files will be available under ~/home/yourusername~. These files can also be 
+accessed from any other lab machines in ECS, but not from other Engineering labs. On Windows lab machines, your network drive 
+will be available as drive ~H:~.
+
+You are responsible for managing your own files, but we suggest creating a ~CSC116~ folder, then creating a separate folder for
+each lab session (e.g. ~CSC116/Lab01~).
+
+The lectures and labs for this course will mostly use a stripped-down development environment, consisting
+of a text editor and a terminal window. You may use other development environments such as CLion or Visual Studio.
+
+*** SSH Connection
+
+Secure Shell (or SSH for short) is a method for secure remote login from one computer to another.
+SSH servers are provided by ITSupport (more information available at [[https://itsupport.cs.uvic.ca/services/e-learning/login_servers/]]).
+To login to one of the  servers using SSH you need a terminal: 
+
+- Linux users and Mac users already have a terminal with SSH installed by default. To connect to the server using the terminal, type the following command: ~ssh YOUR_NETLINK_ID@linux.csc.uvic.ca~ and enter your Netlink ID password.
+
+- For Windows users, the command prompt of the latest Windows version supports SSH. For older versions of Windows, you are encouraged to install PuTTY. PuTTY is a software that enables you to use SSH from Windows. To install PuTTY, please follow this link [[https://putty.org/]].    
+
+For more infromation about SSH, please visit [[https://www.ssh.com/ssh/]]. If you are unable to login to the server please contact ITSupport [[https://itsupport.cs.uvic.ca/services/e-learning/login_servers/]].
+
+*** Some Linux Instructions
+
+Memorizing all commands and their options in Linux is usually not necessary. You can find the most frequently used and basic commands at [[https://www.hostinger.com/tutorials/linux-commands]]. 
+Most commands have a ~--help~ option which prints a short message about how to use the command and exits:
+
+~Command_name --help~
+
+Note: Linux commands are case sensitive hence you need to be careful about what you are keying in.
+
+**** Nano
+
+Nano is a simple command-line text editor included in most Linux installations. With a simple easy to use interface, it is a great choice for Linux beginners. So, we encourage the get familiar of the Nano editor. You can find helpful information about it at: [[https://phoenixnap.com/kb/use-nano-text-editor-commands-linux]]
+
+*** Uploading Files
+
+To upload, or modify files into the server, you can use FTP protocol using the tool *FileZilla* which is available for Windows, Mac, and Linux operating systems, (available from [[https://filezilla-project.org/download.php?type=client]]). After you installed FileZilla, follow the instructions below to connect to the server:
+1. Open FileZilla client.
+2. Open *Site Manger* by clicking the top left icon in menu bar, or press Ctrl+S.
+3. Click *New Site* button and give a name to the new site connection. For example ~linux.csc.uvic.ca~.
+4. At the right side panel enter the following information:
+	- Host: ~linux.csc.uvic.ca~	
+	- Port: ~22~
+	- Protocol: ~SFTP – SSH File Transfer Protocol~
+	- Logon Type: ~Normal~
+	- User: ~Your Netlink ID~
+	- Password: ~Your Netlink Password~
+5. Click Connect button to connect (OK button to save the connection).
+6. Accept fingerprint warning when prompt.
+7. You are now connected to the server via SFTP using password.
+
+To learn how to use FileZilla, there is a tutorial wiki here: [[https://wiki.filezilla-project.org/Using]].
+
+
+* Part 1: Hello World
+
+The code below is the complete "Hello World" program in C++.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+
+int main() {
+	std::cout << "Hello World\n";
+	
+	return 0;
+}
+#+END_SRC
+
+Copy and paste the code above into a text editor and save the file as ~hello_world.cpp~. If you follow our advice, the full path 
+of your file will be ~/home/yourusername/CSC116/Lab01/hello_world.cpp~.
+
+Open a command window in the same directory as your saved ~hello_world.cpp~. To compile the program, run the following command.
+
+#+BEGIN_EXAMPLE
+clang++ -Wall -Wextra -Werror -std=c++17 -o hello_world hello_world.cpp
+#+END_EXAMPLE
+
+Any program you write for assignments or labs must be compiled using this command. Only two parts of the command will change:
+- The name of the files to be compiled (~hello_world.cpp~ above)
+- The name of the executable program generated by the compiler (~hello_world~ above)
+
+The ~-std=c++17~ parameter instructs the compiler to use the C++17 standard. The ~-Wall~ parameter enables all warning messages. 
+Compiler warnings should generally be taken seriously; on assignments, you will lose marks if the compiler generates warnings 
+(even if your code works). The ~-o~ parameter specifies that the following text will be the name of the executable file.
+
+Generally, the compiler only produces warning and error output. If compilation is successful, the compiler will produce no output. 
+
+You can run your program by typing ~./hello_world~ at the command prompt. The same syntax works on Mac machines; on Windows, 
+you may omit the ~./~ at the beginning of the command.
+
+* Part 2: Basic Input with ~std::cin~
+
+The program below reads a single number (of type ~int~) from the user and prints it out.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+
+int main() {
+	int num {};
+	
+	std::cout << "Enter a number: ";
+	std::cin >> num;
+	std::cout << "You entered " << num << std::endl;
+	
+	return 0;
+}
+#+END_SRC
+
+Put the code above in a file called ~read_number.cpp~ and verify that it compiles and runs successfully. What happens to the 
+value of ~num~ when invalid input is provided? This program has no ability to detect invalid input like when a string is entered.
+Could the resulting value be used to detect invalid inputs?
+
+** Three Patterns for Detecting Invalid Input
+The three programs below demonstrate different ways to test whether an input operation failed. Notice that all three operations 
+use ~std::cin~ for the test and not the variable ~num~ storing the input.
+
+*** Pattern 1: Stream State Function
+The expression ~std::cin.fail()~ evaluates to a boolean value (~true~ or ~false~). After a failed operation, ~std::cin.fail()~ 
+will return ~true~. We can use ~std::cin.fail()~ in an ~if~ statement to validate our input.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+
+int main() {
+	int num {};
+	
+	std::cout << "Enter a number: ";
+	std::cin >> num;
+	
+	if (std::cin.fail()) {
+		std::cout << "Input was invalid.\n";
+	} else {
+		std::cout << "You entered " << num << std::endl;
+	}
+	
+	return 0;
+}
+#+END_SRC
+
+*** Pattern 2: Inherent Stream State
+The input stream ~std::cin~ can be treated as a boolean value. Whenever a valid operation has taken place ~std::cin~ will 
+be equivalent to ~true~ otherwise it will be ~false~.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+
+int main() {
+	int num {};
+	
+	std::cout << "Enter a number: ";
+	std::cin >> num;
+	
+	if (std::cin) {
+		std::cout << "You entered " << num << std::endl;
+	} else {
+		std::cout << "Input was invalid.\n";
+	}
+	
+	return 0;
+}
+#+END_SRC
+
+*** Pattern 3: Result of Stream Operation
+Finally, the input operation itself returns a boolean result. This operation evaluates to ~true~ if the operation succeeded 
+and ~false~ otherwise. This allows a convenient shorthand for Pattern 2.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+
+int main() {
+	int num {};
+	
+	std::cout << "Enter a number: ";
+	
+	if (std::cin >> num) {
+		std::cout << "You entered " << num << std::endl;
+	} else {
+		std::cout << "Input was invalid.\n";
+	}
+	
+	return 0;
+}
+#+END_SRC
+
+** Exercise 1: Summing Numerical Input
+
+Write a C++ program which repeatedly prompts the user for numbers until the user enters non-integer data (qualifying as invalid 
+input). After non-integer data is entered, the program prints two pieces of information before terminating:
+ - The number of values entered (not including the invalid input)
+ - The sum of all numerical values entered
+
+An example run of a successful solution appears below.
+
+#+BEGIN_EXAMPLE
+Enter a number: 10
+Enter a number: 6
+Enter a number: 17
+Enter a number: asdf
+Input was invalid.
+Number of Values Entered: 3
+Sum: 33
+#+END_EXAMPLE
+
+You have already seen how to validate a single user input. What programming technique will you use to keep requesting user input 
+while your program continues to receive valid input?
+
+* Part 3: Vectors
+
+~std::vector~ is essentially an array. Unlike an array in C, ~std::vector~ has no maximum size constraint. To implement a 
+similar data structure in C, ~malloc~ or ~realloc~ function calls would be required to adjust the capacity of the array. 
+However, ~std::vector~ internally manages its memory safely and efficiently. A ~std::vector~ should be used in favor of an array 
+in nearly all cases. Further information can be found at [[https://en.cppreference.com/w/cpp/container/vector]].
+
+The program below uses ~std::vector~ to store the sequence ~10, 6, 17, 111, 116~ then prints out the elements of the vector 
+in order. The output of the program is shown below the code listing.
+
+#+BEGIN_SRC cpp :results output :exports both
+#include <iostream>
+#include <vector>
+
+int main() {
+	std::vector<int> vec {};
+	
+	vec.push_back(10);
+	vec.push_back(6);
+	vec.push_back(17);
+	vec.push_back(111);
+	vec.push_back(116);
+
+	std::cout << "vec contains " << vec.size() << " elements\n";
+	std::cout << "Contents: ";
+	for (auto val : vec) {
+		std::cout << val << " ";
+	}
+	std::cout << std::endl;
+
+	return 0;
+}
+#+END_SRC
+
+#+RESULTS:
+: vec contains 5 elements
+: Contents: 10 6 17 111 116
+
+** Exercise 2: Vectors and Input
+
+Write a program which reads integers from the user until an invalid input is read. After receiving invalid input the program
+then prints out two pieces of information before terminating:
+ - The number of elements read
+ - A listing of all elements read in order of input
+ 
+An example run of a successful solution appears below.
+
+#+BEGIN_EXAMPLE
+Enter a number: 10
+Enter a number: 6
+Enter a number: 17
+Enter a number: asdf
+Input was invalid.
+Number of Values Entered: 3
+Values: 10 6 17
+#+END_EXAMPLE
+
+Build off your solution to Exercise 1 by using a vector to store and print the sequence of user input. How are you going to add
+elements into your vector to preserve the user input order?
+
+** Vector Element Access
+
+The program below demonstrates the ~at~ function of ~std::vector~, which is used to access specific elements of the vector by 
+index. The output of the program appears below the code listing. Alternatively, you can use square brackets, ~[]~, to access 
+specific elements in a ~std::vector~ like an array. However, unlike an array square brackets can not be used to insert an 
+element into a ~std::vector~. Use ~at~ instead of ~[]~ to avoid confusion when working with vectors.
+
+#+BEGIN_SRC cpp :results output :exports both
+#include <iostream>
+#include <vector>
+
+int main() {
+	std::vector<int> vec {};
+	
+	vec.push_back(10);
+	vec.push_back(6);
+	vec.push_back(17);
+	vec.push_back(111);
+	vec.push_back(116);
+
+	std::cout << "The first element of vec is " << vec.at(0) << std::endl;
+	std::cout << "The last element of vec is " << vec.at(vec.size() - 1) << std::endl;
+
+	return 0;
+}
+#+END_SRC
+
+#+RESULTS:
+: The first element of vec is 10
+: The last element of vec is 116
+
+** Exercise 3: Iterating a Vector in Reverse
+
+Build off your solution to Exercise 2 by listing the input elements in *reverse order*. An example run of a successful solution 
+appears below.
+
+#+BEGIN_EXAMPLE
+Enter a number: 10
+Enter a number: 6
+Enter a number: 17
+Enter a number: asdf
+Input was invalid.
+Number of Values Entered: 3
+Values (forwards): 10 6 17
+Values (reverse): 17 6 10
+#+END_EXAMPLE
+
+Your solution to Exercise 2 printed the elements in forwards order. If you were to reuse the forwards printing code, what 
+changes would be required to print the elements in reverse order?
+
+** Challenge Exercise: Comma Separated and Sorted Printing
+
+Modify your Exercise 3 code to print all elements separated by commas (with no comma after the last element). Afterwards add an 
+extra line of output printing all elements in ascending sorted order. An example run of a successful solution appears below.
+
+#+BEGIN_EXAMPLE
+Enter a number: 10
+Enter a number: 6
+Enter a number: 17
+Enter a number: asdf
+Input was invalid.
+Number of Values Entered: 3
+Values (forwards): 6, 10, 17
+Values (reverse): 17, 6, 10
+Values (sorted): 6, 10, 17
+#+END_EXAMPLE
+
+Start by printing a comma after each element including the last. What change to the printing loops is required so a comma does 
+not appear after the last element? 
+
+Consider these two options for printing the sorted user input sequence:
+ - Create a new vector to build a sorted sequence as the user inputs data
+ - Repeatedly search the existing vector for the next smallest element to print
+
+The first option requires adding new elements into specific indexes of the vector to enforce a sorted order. How would you 
+insert an element at a specific index? How would you determine what index to insert the new element at to preserve sorted order? 
+The second option requires finding the smallest element from the vector. How would you find the smallest element? Once the 
+smallest is found, how would you remove it so the next smallest element can be found? Use the website linked in Part 3 for ideas. 
