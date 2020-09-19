@@ -1,0 +1,261 @@
+#+TITLE: Lab 02: Command Line Arguments, File I/O, and Strings
+
+* Overview
+
+This lab covers using command line arguments, basic File I/O, the use of the ~std::string~ type, and more exercises involving 
+the ~std::vector~ type.
+
+* Part 1: Using Command Line Arguments
+
+To compile a C++ program you run ~clang++ -Wall -Wextra -Werror -std=c++17 -o executable source.cpp~. By changing the arguments you provide ~clang++~, 
+you change the behavior of the compiler, like changing the source file to compile a different program. Likewise, any C++ 
+program can receive command line arguments from the user running the program, like in the following example. 
+
+#+BEGIN_EXAMPLE
+./sum_ints 2 2 -1
+3
+./sum_ints -4 7 2 1
+6
+#+END_EXAMPLE
+
+The source of the program above is shown below.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+#include <vector>
+#include <string>
+
+int main(int argc, char** argv) {
+    std::vector<std::string> arguments {};
+    int sum {0};
+	
+    for (int i {1}; i < argc; ++i) {
+        arguments.push_back(argv[i]);
+    }
+	
+    for (auto arg : arguments) {
+        sum += std::stoi(arg);
+    }
+    std::cout << sum << std::endl;
+	
+    return 0;
+}
+#+END_SRC
+
+Notice the two new parameters to ~main~ are:
+ - ~argc~, the number of command line arguments
+ - ~argv~, an array of C-strings representing each argument
+ 
+The program above uses a for-loop to convert the array of C-strings into a vector of ~std::string~ objects. The C-strings are 
+automatically converted to ~std::string~ when they are added to the vector. Additionally, the loop starts at index 1, because 
+~argv[0]~ is set to the name of the program (not one of the user arguments).
+
+The function ~std::stoi~ takes an ~std::string~ object and attempts to convert it to an integer (which is then returned).
+ 
+* Part 2: Reading from a Text File and Standard Input
+
+The goal of input operations is to convert incoming data into program objects, and output operations convert program objects into 
+output data. In C++ input/output operations (I/O) are performed through streams provided by the ~iostream~ and ~fstream~ 
+libraries. Basic formatted input/output, ~printf~ and ~scanf~ in C, is performed with stream insertion and extraction operators 
+(~<<~ and ~>>~). Basic unformatted I/O is performed through stream functions ~getline~ and ~write~.
+
+** Reading a File Using ~fstream~
+
+The following program attempts to open a text file called ~inputfile.txt~. If the file exists then the program prints out each 
+line of the file, otherwise it prints an error.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+#include <fstream>
+#include <string>
+
+int main(int argc, char** argv) {
+    std::string filename {"inputfile.txt"};
+    std::ifstream myfile {};
+    myfile.open(filename);
+    
+    if (myfile.is_open()) {
+        std::string line {};
+		
+        while (std::getline(myfile, line)) {
+            std::cout << line << std::endl;
+        }
+        myfile.close();
+    } else {
+        std::cout << "Unable to open file." << std::endl;
+    }
+	
+    return 0;
+}
+#+END_SRC
+
+** Exercise 1: Filename Command Line Argument
+
+Modify this previous program so that the name of the input file is given by the first command line argument. Create a text 
+file called ~seashells.txt~ and copy-paste the following text. Be sure you save ~seashells.txt~ in the same directory as 
+the your source code.
+
+#+BEGIN_EXAMPLE
+sally sells seashells by the seashore
+she sells seashells on the seashell shore
+the seashells she sells are seashore shells
+of that im sure
+#+END_EXAMPLE
+
+** Reading from Standard Input
+
+It can be tedious to repeatedly enter input while testing a program. One way around this is to make a text file from the input 
+then instruct the operating system to feed the file into the program. This is called *input redirection* or *piping* input into 
+the program.
+
+For example, consider the program ~read_lines.cpp~ below, which reads lines from ~std::cin~ and prints them as output.
+
+#+BEGIN_SRC cpp :results output :exports code
+#include <iostream>
+#include <string>
+
+int main() {
+    std::string s {};
+	
+    while (std::getline(std::cin, s)) {
+        std::cout << "Input line: " << s << std::endl;
+    }
+	
+    return 0;
+}
+#+END_SRC
+
+The above program will run until ~std::cin~ reaches an end-of-file character. When reading a file, this character automatically 
+occurs when the end of the file is reached. When reading from the user, this character is sent when the user enters ~Ctrl+D~ 
+(on Mac/Linux systems) or ~Ctrl+Z~ on a newline (on Windows).
+
+Use the following command to run the program above with the input redirected from a text file.
+
+#+BEGIN_EXAMPLE
+./read_lines < seashells.txt
+#+END_EXAMPLE
+
+** Exercise 2: Standard Input Practice
+ 
+Try the command above to pipe ~seashells.txt~ into the standard input stream for the ~read_lines~ program.  Afterwards, run the 
+program again using user input instead. When you want to terminate the program, use ~Ctrl+D~ to send the end-of-file character.
+
+* Part 3: String and Vector Exercises
+
+In C++ the ~std::string~ type represents a sequence of characters. Unlike C-strings which are fixed size, ~std::string~ has a
+dynamic size. As a result, you do not have to arbitrarily declare a string's max size or check a string's capacity before an 
+operation. ~std::string~ and ~std::vector~ share a number of similar functions such as ~size~, ~at~, and ~push_back~. 
+Additionally, ~std::string~ supports string specific operations like concatenation and substring. Further information can be 
+found at [[https://en.cppreference.com/w/cpp/string/basic_string]].
+
+** Exercise 3: Printing Text Lines in Reverse Order
+
+Modify the program from Exercise 2 to print the lines from the input file in reverse order.
+
+#+BEGIN_EXAMPLE
+./reverse_line_order < seashells.txt
+of that im sure 
+the seashells she sells are seashore shells  
+she sells seashells on the seashell shore 
+sally sells seashells by the seashore 
+#+END_EXAMPLE
+
+Because it is unknown how many lines are in the input file, you should use a vector of strings (~std::vector<std::string>~) 
+to record each line. How should each line be added to the vector to facilitate printing the lines in reverse order?
+
+Two options for adding an element into a vector:
+ - ~push_back~, add a new element to the end of a vector
+ - ~insert~, add a new element at a specific position of the vector
+
+The following shows using ~push_back~ to add a string to the end of a vector:
+
+#+BEGIN_SRC C++
+std::string seng {"SENG265"};
+std::vector<std::string> courses {"CSC111", "CSC116"};
+courses.push_back(seng); // courses = ["CSC111", "CSC116", "SENG265"] 
+#+END_SRC
+
+Exercise 3 can be solved with ~push_back~, but feel free to use ~insert~ for an extra challenge. ~insert~ does not take an 
+explicit index value like ~at~. Instead, use ~begin() + i~ to emulate traditional indexing with insert. For now it is 
+sufficient to understand that ~begin~ points to the beginning of the vector (the exact semantics of ~begin()~ will be covered in October). 
+The following shows using ~insert~ to add a string at a specific position of a vector:
+
+#+BEGIN_SRC C++
+std::string seng {"SENG265"};
+std::vector<std::string> courses {"CSC111", "CSC116"};
+courses.insert(courses.begin() + 1, seng); // courses = ["CSC111", "SENG265", "CSC116"] 
+#+END_SRC
+
+Which of the two functions makes sense for the looping technique you plan to use for this exercise?
+
+** Exercise 4: Printing a String in Reverse Order
+In addition to printing the lines in reverse order like in Exercise 3, reverse the sequence of characters of each line.
+
+#+BEGIN_EXAMPLE
+./reverse_all < seashells.txt
+erus mi taht fo
+sllehs erohsaes era slles ehs sllehsaes eht
+erohs llehsaes eht no sllehsaes slles ehs
+erohsaes eht yb sllehsaes slles yllas
+#+END_EXAMPLE
+
+Using your solution to Exercise 3, you only have to figure out how to print each line in reverse. Each line is stored in the 
+vector as a ~std::string~ which has many similar functions to a ~std::vector~. What ~std::string~ functions will you use to 
+access each character and to determine when to stop looping?
+
+** Alliterations 
+Alliteration refers to sequences of *two or more* consecutive words that all begin with the same letter. For example, 
+"she sells seashells" and "pumpkin pie" are alliterations. In the ~seashells.txt~ input file used above, there are five 
+different alliterative phrases: 
+ - "sally sells seashells" (line 1)
+ - "seashore she sells seashells" (lines 1/2)
+ - "seashell shore" (line 2)
+ - "seashells she sells" (line 3)
+ - "seashore shells" (line 3)
+
+** Exercise 5: Count Alliterations
+
+Write a program which reads a file from standard input and prints out the number of alliterative phrases found (including 
+alliterations that cross line boundaries).
+
+A test run on the ~seashells.txt~ file should produce output similar to the following example.
+
+#+BEGIN_EXAMPLE
+./count_alliteration < seashells.txt
+Number of alliteration occurrences: 5
+#+END_EXAMPLE
+
+In previous exercises you read the input line by line with ~std::getline~. Similarly, the ~>>~ operator can be used to read the 
+input word by word. How will your program know when a new alliteration starts and ends? When will you increment the alliteration 
+counter?
+
+** What to submit? Print Alliterations and Word Frequencies
+
+Modify the program you wrote in Exercise 5 to print each alliteration it finds, like in the example below. Afterwards, for each 
+unique word across all the alliterations, print the word and the number of times it appears in the set of all alliterations.
+
+#+BEGIN_EXAMPLE
+./find_alliteration < seashells.txt
+Alliteration 1: sally sells seashells
+Alliteration 2: seashore she sells seashells
+Alliteration 3: seashell shore
+Alliteration 4: seashells she sells
+Alliteration 5: seashore shells
+
+Word Frequencies:
+sally 1
+sells 3
+seashells 3
+seashore 2
+she 2
+seashell 1
+shore 1
+shells 1
+#+END_EXAMPLE
+
+After an alliteration has ended, the following word may or may not be the start of another alliteration. How will your program 
+print the first word of the next alliteration?
+
+You are asked to compute word frequencies across alliterations. Does the fact that you are working with a set of alliterations 
+affect the algorithm required to solve the problem? Can you treat the problem differently to simplify it? How will you keep 
+track of unique words and the frequency count associated with each word? 
