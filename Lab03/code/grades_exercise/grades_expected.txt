@@ -1,0 +1,7 @@
+Read 14 grades
+Original grades: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average: 57.7143
+Median: 68.5
+Grades with zeros removed: 71 49 92 87 66 81 74 51 64 94 79 
+Average (zeros excluded): 73.4545
+Median (zeros excluded): 74

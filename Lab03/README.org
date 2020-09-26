@@ -1,0 +1,201 @@
+#+TITLE: Lab 03: Creating Test Cases and More Vector Exercises
+
+* Overview
+
+This lab will cover redirecting the standard output stream ~std::cout~ to a file, and using 
+the Linux command line tool ~diff~ to compare program's output against our own created test 
+cases. We will also work on more ~std::vector~ exercises.
+
+* Download the Lab Files
+
+Before you begin the lab, download the files in the ~code~ folder into a new folder which you will work from for this lab.
+
+* Part 1: Piping the Standard Output Stream
+
+In the previous lab we learned how to redirect (or *pipe*) a file into the standard input 
+stream ~std::cin~ when running our program from the command line. We can also pipe the 
+standard output stream ~std::cout~ to a file using the following syntax.
+
+#+BEGIN_EXAMPLE
+./write_cout > output.txt
+#+END_EXAMPLE
+
+Strings printed using ~std::cout <<~ will now be written to the file ~output.txt~, instead 
+of being printed out to the command line. We can combine piping both input and output too. 
+
+#+BEGIN_EXAMPLE
+./write_cout < input.txt > output.txt
+#+END_EXAMPLE
+
+* Part 2: Creating Test Cases and Comparing with ~diff~
+
+Testing is an important part of software development. Just as you would test mechanical 
+components before use, we need to verfiy that software components are fit for use.
+
+Writing test cases for a program, even before writing the program itself, is an extremely 
+helpful way of catching bugs early in development. It can also help you familiarize yourself 
+with the problem and the solution requirements. 
+
+~diff~ is a Linux command line tool used to compare the differences between two text files. It 
+examines both files line-by-line and outputs each set of differing lines. If there are no 
+differences between the text files, ~diff~ will produce no output. Windows has a command line 
+tool similar to ~diff~ called ~fc~. 
+
+Examine the ~diff~ output below for the following two text files.
+
+#+BEGIN_EXAMPLE
+Today is gonna be the day
+That they're gonna throw it back to you
+By now you should've somehow
+Realized what you gotta do
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+Today is gonna be the day
+That they're gonna thraw it back to you
+By now you should've somehow
+Realized what you gotta do
+#+END_EXAMPLE
+
+#+BEGIN_EXAMPLE
+diff file1.txt file2.txt
+2c2
+< That they're gonna throw it back to you
+---
+> That they're gonna thraw it back to you
+#+END_EXAMPLE
+
+To test a program, we can *pipe* its standard output stream to a text file, then compare the 
+output file to a text file containing the expected results, using ~diff~.
+
+** Exercise 1: Debugging with ~diff~
+
+The program ~string_case.cpp~ in the ~code~ folder counts the number of upper and lower case 
+letters in each line of input, then prints each line with upper case letter removed. However, 
+~string_case.cpp~ has some bugs. 
+
+Compile and run this program, piping in the provided input ~string_input.txt~ and piping its 
+output to a new text file. Compare its output to the expected solution ~string_expected.txt~ 
+using ~diff~. Use the ~diff~ output to find the bugs.
+
+* Part 3: More Vector Exercises
+
+For this part we will write a program that calculates various statistics from a set of grades. 
+Some starter code for your program ~read_grades.cpp~ is in the ~code~ folder. The following 
+exercises implement each of the blank functions. 
+
+Text files with input grades and expected output are also provided with the starter code. Use 
+these to test your program as you implement each blank function. 
+
+** Exercise 2: Grade Calculation (Average)
+
+Write a program that takes in a set of input grades and outputs the average (mean) like the 
+following:
+
+#+BEGIN_EXAMPLE
+./read_grades < grades_input.txt
+Read 14 grades
+Original grades: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average: 57.7143
+Median: 0
+Grades with zeros removed: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average (zeros excluded): 57.7143
+Median (zeros excluded): 0
+#+END_EXAMPLE
+
+*pipe* its output into a text file and compare it to ~grades_expected.txt~ using ~diff~.
+
+** Sorting a vector
+
+The C++ standard library includes a function ~std::sort~ (available via ~#include <algorithm>~) 
+which sorts a sequence of data. The arguments to ~std::sort~ indicate the beginning and end of 
+the sequence to sort. In October you will go over in detail what these arguments are. To sort all 
+of the elements in a vector ~vec~, the following call to ~std::sort~ can be used.
+
+#+BEGIN_EXAMPLE
+std::sort(vec.begin(), vec.end());
+#+END_EXAMPLE
+
+** Exercise 3: Grade Calculation (Median)
+
+Extend your program to calculate the median of the grades, as follows: 
+
+#+BEGIN_EXAMPLE
+./read_grades < grades_input.txt
+Read 14 grades
+Original grades: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average: 57.7143
+Median: 68.5
+Grades with zeros removed: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average (zeros excluded): 57.7143
+Median (zeros excluded): 68.5
+#+END_EXAMPLE
+
+The median is the middle element of a sorted sequence. If the the sequence has an even number 
+of elements, the median is the average of the two middle elements. Note: the function ~compute_median~ 
+takes in a constant reference to a vector, therefore you must create a new vector to sort. How 
+should your ~compute_median~ function behave when an empty vector is passed?
+
+** Exercise 4: Grade Calculation Excluding 0
+
+Extend your program again to calculate the mean and median of the grades, excluding 0s, as follows:
+
+#+BEGIN_EXAMPLE
+./read_grades < grades_input.txt
+Read 14 grades
+Original grades: 71 49 92 87 0 66 81 74 0 51 64 94 79 0 
+Average: 57.7143
+Median: 68.5
+Grades with zeros removed: 71 49 92 87 66 81 74 51 64 94 79 
+Average (zeros excluded): 73.4545
+Median (zeros excluded): 74
+#+END_EXAMPLE
+
+Printing grades without 0 elements can be solved with simple conditional logic, but how will you 
+exclude 0 elements from the grades vector when computing the average and median?
+
+** What to submit? Filter Data Sequence from a Vector
+
+Write a program which recieves two integer data sets from standard input, then removes all complete 
+sequences of data set 1 from data set 2, and finally prints the filtered data set. The number *-1* 
+will be used to separate the two data sets in the input stream.
+
+If a text file named ~data_sets.txt~ contains the following:
+
+#+BEGIN_EXAMPLE
+1 1
+-1
+1 1 1 2 6 5 1 1 6
+#+END_EXAMPLE
+
+An example run of a successful solution on ~data_sets.txt~ appears below:
+
+#+BEGIN_EXAMPLE
+./filter_data < data_sets.txt
+Data Set 1: 1 1
+Data Set 2: 1 1 1 2 6 5 1 1 6 
+Filtered: 1 2 6 5 6
+#+END_EXAMPLE
+
+For this exercise, try using the ~erase~ vector function to delete elements from the data set 2 vector. 
+The following section describes using the ~erase~ function. 
+
+At some point while looping over data set 2, the size of data set 1 will be greater than the number 
+of remaining elements in data set 2. Also, it is possible that data set 1 is longer than data set 2. 
+How will your loop over data set 2 accommodate these facts? What if one or both of the data sets are empty?
+
+** Deleting Elements from a Vector
+
+The ~erase~ function of vectors will remove an element at a specific position and move the remaining 
+elements to fill the missing space. To remove a single element at index ~i~, call ~erase~ with arguments 
+~begin() + i~. For now it is sufficient to understand that ~begin~ points to the beginning of the vector. 
+The following is an example ~erase~ being called remove an element from a vector:
+
+#+BEGIN_EXAMPLE
+std::vector<std::string> courses {"CSC111", "SENG265", "CSC116"};
+courses.erase(courses.begin() + 1); // courses = ["CSC111", "CSC116"]
+#+END_EXAMPLE
+
+In the previous example, notice how the index position of "CSC116" changed from index *2* (before the 
+~erase~ operation) to index *1* (after the ~erase~ operation). When looping and erasing, be mindful of 
+the shifting indexes of elements after each ~erase~ operation.
