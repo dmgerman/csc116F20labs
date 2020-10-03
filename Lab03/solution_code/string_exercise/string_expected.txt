@@ -1,0 +1,30 @@
+Input line: Today is gonna be the day
+Number of lower case letters: 19
+Number of upper case letters: 1
+Upper case letters removed: oday is gonna be the day
+
+Input line: That they're gonna throw it back to you
+Number of lower case letters: 30
+Number of upper case letters: 1
+Upper case letters removed: hat they're gonna throw it back to you
+
+Input line: By now you should've somehow
+Number of lower case letters: 22
+Number of upper case letters: 1
+Upper case letters removed: y now you should've somehow
+
+Input line: Realized what you gotta do
+Number of lower case letters: 21
+Number of upper case letters: 1
+Upper case letters removed: ealized what you gotta do
+
+Input line: I don't believe that anybody
+Number of lower case letters: 22
+Number of upper case letters: 1
+Upper case letters removed:  don't believe that anybody
+
+Input line: Feels the way I do, about you now
+Number of lower case letters: 23
+Number of upper case letters: 2
+Upper case letters removed: eels the way  do, about you now
+

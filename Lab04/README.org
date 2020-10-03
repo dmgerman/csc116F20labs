@@ -1,0 +1,178 @@
+#+TITLE: Lab 04: Matrices, Exceptions, and Function Overloading
+
+* Overview
+
+This lab contains several exercises involving matrices, which are implemented as nested vectors (vectors of vectors), 
+along with some basic uses of exceptions and try/catch logic. Function overloading in C++ is also covered.
+
+* Download the Lab Files
+
+Before you begin the lab, download the files from: ~lab04-files.zip~.
+Afterwards, extract them into a new folder which you will work from for this lab.
+
+* Part 1: Function Overloading
+
+In C++ you can have multiple definitions for the same function name in the same scope. The function signatures
+however must differ by the types and/or number of parameters. You cannot overload by only changing the return type.
+
+#+BEGIN_SRC C++
+#include <iostream>
+#include <vector>
+
+void print(int const& a) {
+    std::cout << "Printing an integer: " << a << std::endl;
+}
+
+void print(std::vector<int> const& V) {
+    std::cout << "Printing a vector of integers: ";
+    for (auto a: V) {
+        std::cout << ' ' << a;
+    }
+    std::cout << std::endl;
+}
+
+int main() {
+    int a {5};
+    std::vector<int> V {1, 3, 5, 6, 7};
+
+    print(a);
+    print(V);
+    
+    return 0;
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Printing an integer: 5
+Printing a vector of integers: 1 3 5 6 7
+#+END_EXAMPLE
+
+One purpose of function overloading is to reduce code clutter. Consider the previous example without function overloading, each ~print~ 
+function would need a different name, possibly: ~print_int~ and ~print_int_vector~. These names would over specify the purpose of the 
+function. The function arguments themselves indicate that the function prints an integer or a vector of integers. The overloaded functions, 
+however, effectively communicate the purpose of each function.
+
+* Part 2: Matrices
+
+The provided program ~part1.cpp~ for the first exercise is located in the ~code/part1~ folder. The program contains a type ~matrix_type~ 
+which is defined as:
+
+#+BEGIN_SRC C++ 
+using matrix_type = std::vector<std::vector<double>>;
+#+END_SRC
+
+The ~matrix_type~ is a vector containing row vectors, and each row vector is of type ~double~.
+
+** Exercise 1: Fundamental Matrix Operations
+
+The ~part1.cpp~ file contains three functions for you to implement:
+ - The ~identity~ function constructs an N x N identity matrix.
+ - The ~hilbert~ function constructs an N x N Hilbert matrix. 
+ - The ~add_matrices~ function adds two matrices together and returns the result.
+
+The comments in ~part1.cpp~ contain additional details about each function. In particular, ~hilbert~ will require some extra attention. 
+Recall that entry ~(i,j)~ of a Hilbert matrix is equal to ~1/(i + j - 1)~. Be sure to adjust the formula to accommodate C++'s 0-based 
+indexing.
+ 
+A series of test inputs and expected outputs are provided in the ~code/part1/tests~ folder. Additionally, there is a script called 
+~tester.sh~ which will run all the provided tests on the ~part1~ program (enter ~./tester.sh~ to run the script).
+
+* Part 3: More Matrices and Exceptions.
+
+The program for this part is called ~part2~ and is produced from the ~part2.cpp~ file in ~code/part2~.
+
+Like part 1, the ~part2.cpp~ file involves matrices. The first exercise in part 2 involves implementing two functions which throw 
+exceptions, and the second exercise involves adding try/catch statements to handle exceptions.
+
+** C++ Exceptions
+
+Exceptions in C++ are thrown to reject an invalid operation. For example, we may have a function that determines the prime factors of 
+an ~int~.
+
+#+BEGIN_SRC C++
+std::vector<int> get_prime_factors(int n) {
+    if (n <= 1) {
+        throw std::runtime_error("Cannot find prime factors for numbers less than 2.");
+    }
+
+    // find prime factors...
+}
+#+END_SRC
+
+If the code calling this function was embedded in a ~try~ block, control of the program will then be transferred to the corresponding 
+~catch~ block when an exception is thrown.
+
+#+BEGIN_SRC C++
+int main() {
+    try {
+        int input {};
+        std::cin >> input;
+        get_prime_factors(input);
+    } catch (std::runtime_error& e) {
+        std::cout << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+#+END_SRC
+
+Uncaught exceptions will cause the operating system to terminate the program. You may have seen this before, for example when accessing 
+an out-of-bounds index of a ~vector~.
+
+** Exercise 2: Throwing Exceptions
+
+The ~part2.cpp~ file contains two functions for you to implement: ~trace~ and ~add_matrices~. Unlike part 1, your functions must detect 
+various error cases that may occur when inputs are invalid. When these errors occur, throw appropriate exceptions. The comments in 
+~part2.cpp~ contain more details about each function.
+
+The ~trace~ function computes the trace (the sum of diagonal entries) of the provided matrix. The trace is only defined for square 
+matrices. Your function must throw a ~std::domain_error~ with the message ~Unable to compute trace of a non-square matrix~ if the 
+provided matrix is not square.
+
+The ~add_matrices~ function adds two matrices together and returns the result. You can use your part 1 code as the basis for this 
+function. This version is expected to throw an ~std::domain_error~ with error message ~Incompatible matrix dimensions~ if the two 
+provided input matrices do not have the same dimensions.
+
+There is another script also called ~tester.sh~ which will run all the provided tests on the ~part2~ program. After Exercise 2 is 
+complete, the first three of the provided tests will pass. The last test should still fail, since it covers the material in Exercise 3.
+
+** Exercise 3: Catching Exceptions
+
+In Exercise 2, you used ~throw~ statements to create exceptions. In Exercise 3, you will use try/catch blocks to handle thrown exceptions.
+
+The ~read_matrix~ function in ~part2.cpp~ reads a matrix from standard input. If it is unable to do so, an ~std::runtime_error~ is thrown.
+In the provided ~main~ function, exceptions thrown by ~read_matrix~ are not handled. If an unhandled exception occurs, the program will be 
+terminated by the operating system.
+
+Your task is to add try/catch blocks to ~main~. If ~read_matrix~ throws an ~std::runtime_error~, the error is caught and the 
+program exits gracefully (with ~return 1;~) after printing the error message. The message should be printed in the format 
+~Error reading matrix: <message>~, where ~<message>~ is the error message in the ~std::runtime_error~ object thrown from ~read_matrix~. 
+
+For example, if ~read_matrix~ throws an exception with the message ~Invalid matrix element~, the output produced by ~main~ should be 
+~Error reading matrix: Invalid matrix element~.
+
+You must modify ~main~ to implement your solution. You should not have to modify ~read_matrix~ to complete this exercise. Once Exercise 3 
+is complete, all of the provided tests for Part 2 should pass.
+
+** What to submit? Drawing a Spiral Pattern
+
+Write a program which draws a spiral pattern (shown in the example) in an all zeros square matrix. The starter code for this program is 
+provided in the ~code/challenge~ folder. The program takes one positive integer command line argument representing the height and width 
+of the square matrix. 
+
+Assume the solution to this challenge is a program called ~spiral~. If ~./spiral 6~ were run, the program would output:
+
+#+BEGIN_EXAMPLE
+6 6 6 6 6 6
+0 0 0 0 0 5
+0 3 2 2 0 5
+0 3 0 1 0 5
+0 3 0 0 0 5
+0 4 4 4 4 5
+#+END_EXAMPLE
+
+Traditional nested for-loops will not be very useful when drawing the spiral pattern. How are you going to loop through the matrix to 
+access the each element on the spiral's path? Because the problem requires non-traditional indexing, you will have to get creative with 
+your loop's stopping condition. The spiral pattern is drawn with repeated cycles of an ~Up, Left, Down, Right~ pattern. How will you 
+translate this into your loop logic?
