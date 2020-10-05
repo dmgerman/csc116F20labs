@@ -176,3 +176,12 @@ Traditional nested for-loops will not be very useful when drawing the spiral pat
 access the each element on the spiral's path? Because the problem requires non-traditional indexing, you will have to get creative with 
 your loop's stopping condition. The spiral pattern is drawn with repeated cycles of an ~Up, Left, Down, Right~ pattern. How will you 
 translate this into your loop logic?
+
+*** Need more hints? No worries
+
+One problem with some students is that they start by writing the for-loop. To solve this problem, you should change your habit. In fact, you should go backwards by solving the problem without the for loop and then try to find patterns and make your code compact afterwards. My suggestion is:
+   1. For a fixed size matrix (6 is good), try to solve this problem without any loops and with constant numbers. There would be around 20 lines of value assignment but that is okay. 
+   2. Then try to change these numbers into the sum of a constant value and an iterative value. So if you have 7,8,9,... change them into 7+0,7+1,7+2,...
+   3. Now try to replace those iterative values with a variable (like i,j,k, etc) and an increment operator.
+   4. Lastly, replace the repeating code with a for-loop.
+   5. Repeat items 2 to 4 until there is no other pattern that you can think of.
