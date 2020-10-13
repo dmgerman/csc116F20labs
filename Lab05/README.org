@@ -1,0 +1,252 @@
+#+TITLE: Lab 05: Containers: Lists, Sets, and Maps
+
+* Overview
+
+This lab contains an introduction to ~std::list~, ~std::set~, and ~std::map~. You will be tasked with 
+implementing functions using these containers to analyze text files.
+
+* Download the Lab files
+
+Before you begin the lab, download the files from: ~lab05-files.zip~.
+Afterwards, extract them into a new folder which you will work from for this lab.
+
+* Shortcomings of ~std::vector~
+
+Vectors are a versatile container for storing data. However, vectors have some properties which 
+can inhibit their usability: elements are associated with index positions, and there can be 
+duplicate elements. Vectors also exhibit undesirable performance characteristics for certain 
+functions like ~insert~ where all elements following the newly inserted element must be shifted 
+over. However, there are other *containers* beyond vector which exhibit different characteristics 
+that align better with problems where vector is lacking. 
+
+* High Performance Insert and Erase with ~std::list~
+
+~std::list~ is a container which provides fast insertion and erasure, but has no *random-access* 
+ability (you cannot index it). Many ~std::list~ interactions use iterators, both ~insert~ and 
+~erase~ take an iterator, and looping often uses iterators as well. However, operations like 
+~push_back~, ~pop_back~, ~push_front~, and ~pop_front~ do not work with iterators.
+
+#+BEGIN_SRC C++
+#include <iostream>
+#include <list>
+
+int main() {
+	std::list<std::string> collection {"Orange", "Guava"};
+
+	collection.push_front("Apple");
+	collection.push_back("Banana");
+	// collection = {"Apple", "Orange", "Guava", "Banana"}
+
+	for (auto iter {collection.begin()}; iter != collection.end();) {
+		if (*iter == "Guava") {
+			iter = collection.erase(iter);
+			iter = collection.insert(iter, "Pear");
+		} else {
+			std::cout << *iter << ' ';
+			++iter;
+		}
+	}
+	std::cout << '\n';
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Apple Orange Pear Banana
+#+END_EXAMPLE
+
+** Exercise 1: Most-Recently Seen Lists
+
+In this exercise you will implement the function ~recently_seen~ which constructs and prints a 
+*most-recently seen list* of the input vector of strings. A most-recently seen list is a list of 
+unique elements where the elements are sorted in order of most recent appearance in the input 
+sequence. For this exercise use a ~std::list~ to construct the most-recently seen list. 
+
+If ~recently_seen~ receives a vector containing ~{"Sea", "Shore,", "sea", "shell's.", "SHORE.", "line!"}~, 
+the output would be:
+
+#+BEGIN_EXAMPLE
+line
+shore
+shells
+sea
+#+END_EXAMPLE
+
+You have to perform preprocessing on each word before you can record its frequency in a ~std::list~. 
+Each input word must be preprocessed into all lowercase letters and have all punctuation removed before using the word as a key in the list.
+The preprocessing involves keeping the alphabetic and alphanumeric characters.
+This [[https://en.cppreference.com/w/cpp/header/cctype][webpage]] has a list of functions which can 
+be used to help with this preprocessing. 
+
+* Maintaining Unique Data with ~std::set~
+
+~std::set~ is a container which maintains a unique set of ordered elements. ~std::set~ has an ~insert~ and ~erase~ 
+function, to add and remove elements from the set. There are no push or pop functions, because a set has no 
+concept of a sequence. The function ~find~ can be used to determine if an element is in a set. ~find~ returns an 
+iterator positioned at the element if it exists or positioned at the ~end~ otherwise.
+
+#+BEGIN_SRC C++
+#include <iostream>
+#include <set>
+
+int main() {
+	std::set<std::string> fruit {};
+
+	fruit.insert("Apple");
+	fruit.insert("Orange");
+	fruit.insert("Banana");
+
+	std::cout << "Set of fruit contains: ";
+	for (auto& f : fruit) {
+		std::cout << f << ' ';
+	}
+	std::cout << '\n';
+
+	auto iter {fruit.find("Pear")};
+	if (iter == fruit.end()) {
+		std::cout << "Pear is not in the fruit set\n";
+	} else {
+		std::cout << "Pear is in the fruit set\n";
+	}
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Set of fruit contains: Apple Banana Orange 
+Pear is not in the fruit set
+#+END_EXAMPLE
+
+** Exercise 2: Punctuation Set
+
+In this exercise you will implement the function ~punctuation~ which creates a set of all punctuation 
+characters used in a vector of input strings. You will be working with the same vector of input used in 
+Exercise 1. The same [[https://en.cppreference.com/w/cpp/header/cctype][webpage]] that was recommended 
+for preprocessing words has a function which may be useful in this exercise. Once all the input has 
+been processed, print each punctuation character out separated by spaces. Continue your work from the 
+previous exercise in ~word_stats.cpp~.
+
+If ~punctuation~ receives a vector containing ~{"Sea", "Shore,", "sea", "shell's.", "SHORE.", "line!"}~, 
+the output would be:
+
+#+BEGIN_EXAMPLE
+! ' , . 
+#+END_EXAMPLE
+
+* Associating Data with ~std::map~
+
+~std::map~ is a container which associates two pieces of data together such that one piece of data 
+can act as a pseudo-index to the other piece of data. The pseudo-index is called the *key* and its 
+associated data is called the *value*. Together they form a *key-value pair*. A ~std::map~ must have 
+all unique keys, otherwise it could not determine which value belongs to a given key. 
+
+In the following example a ~std::map~ is used to model a simple product catalog. The ~std::map~'s 
+key is a string (product name) and value is a double (the product's cost). ~std::map~ has similar 
+functions to vector, but the arguments they expect are different. To determine if a key exists, the 
+~find~ function is used. ~find~ returns an iterator which points to the key-value pair if it is 
+present and ~end~ otherwise.
+
+#+BEGIN_SRC C++
+#include <iostream>
+#include <string>
+#include <map>
+
+int main() {
+	std::map<std::string, double> catalog {};
+
+	catalog.insert({"Apple", 0.75});
+	catalog.insert({"Orange", 0.85});
+	catalog.insert({"Banana", 0.80});
+
+	for (auto data : catalog) {
+		// data.first is the key and data.second is the value stored at the key
+		std::cout << data.first << " costs $" << data.second << '\n';
+	}
+
+	auto iter {catalog.find("Orange")};
+	iter->second = 0.75;
+	std::cout << iter->first << " now costs $" << iter->second << '\n';
+
+	iter = catalog.find("Pear");
+	// check the iterator against end() to test for existence
+	if (iter == catalog.end()) {
+		std::cout << "Catalog does contain Pear\n";
+	} else {
+		std::cout << "Catalog does not contain Pear\n";
+	}
+
+	return 0;
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Apple costs $0.75
+Orange costs $0.85
+Banana costs $0.80
+Orange now costs $0.75
+Catalog does not contain Pear
+#+END_EXAMPLE
+
+** Exercise 3: Computing Word Frequencies
+
+In this exercise you will implement a function ~frequencies~, which computes word frequencies 
+using a ~std::map~ and then prints out each word and the number of times it appeared in the input. 
+The input to the program will not necessarily be clean. A word may appear with capitalized letters 
+or with punctuation at the end. All keys in the map should be lower case strings without punctuation. 
+Starter code is available in ~word_stats.cpp~.
+
+Similar to Exercise 1, each input string must be pre-processed into all lowercase letters and have 
+all punctuation removed before using the word as a key in the list. Continue your work from the 
+previous exercise in ~word_stats.cpp~.
+
+If ~frequencies~ receives a vector containing ~{"Sea", "Shore,", "sea", "shell's.", "SHORE.", "line!"}~, 
+the output would be:
+
+#+BEGIN_EXAMPLE
+sea: 2
+shore: 2
+shells: 1
+line: 1
+#+END_EXAMPLE
+
+In Exercise 1, you implemented all the logic to pre-process an input string. How could you recycle 
+this logic in Exercise 3 without repeating the same code?
+
+A ~std::map~ can be have any types form the *key-value pair*. For this exercise what types should the 
+*key* and *value* be? Also, be mindful that ~std::map~ requires all unique keys when implementing your 
+solution.
+
+** Challenge Exercise: List Addition
+
+Suppose we represent an integer in base 10 with a list object, using one element per digit. For example,
+the number ~610~ would be correspond to the list ~{6, 1, 0}~. This exercise uses such a representation
+to perform positional arithmetic.
+
+Your task is to implement a function ~add_lists~ which takes two list objects in the representation described
+above and returns a new list in the same format (with one element per digit) containing the sum of the 
+numbers represented by each input list.
+
+For example, if list 1 contains ~{1, 1, 6}~ and list 2 contains ~{1, 1, 1}~, the returned list would be ~{2, 2, 7}~. 
+If list 1 contains ~{9, 1, 2}~ and list 2 contains ~{2, 1, 0}~, the returned list would be ~{1, 1, 2, 2}~.
+
+Starter code is available in ~list_addition.cpp~. You can assume the numbers in both lists will have 
+the same number of digits.
+
+This challenge may be solved more effectively using a *reverse iterator*. A reverse iterator is like a 
+normal iterator; however, by incrementing a reverse iterator the iterator moves backwards in the sequence. 
+Calling ~rbegin~ on a container (like a ~std::list~) will return a reverse iterator for the data sequence, 
+and it can be compared against ~rend~ to determine when to stop. The following is an example of working 
+with reverse iterators.
+
+#+BEGIN_SRC C++
+std::list<int> data {5, 7, 4};
+
+for (auto it {data.rbegin()}; it != data.rend(); ++it) {
+	std::cout << *it << ' ';
+}
+std::cout << '\n';
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+4 7 5 
+#+END_EXAMPLE
+
+Questions to consider: How will you handle the carry digit? What if there is a carry digit with the final digits?
