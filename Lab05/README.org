@@ -214,7 +214,7 @@ A ~std::map~ can be have any types form the *key-value pair*. For this exercise 
 *key* and *value* be? Also, be mindful that ~std::map~ requires all unique keys when implementing your 
 solution.
 
-** Challenge Exercise: List Addition
+** What to submit? List Addition
 
 Suppose we represent an integer in base 10 with a list object, using one element per digit. For example,
 the number ~610~ would be correspond to the list ~{6, 1, 0}~. This exercise uses such a representation
