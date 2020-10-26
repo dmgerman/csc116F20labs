@@ -7,7 +7,7 @@ You will be tasked with implementing functions of a simple class.
 
 * Download the Lab Files
 
-Before you begin the lab, download the files from: https://github.com/billbird/116f19_Labs/raw/master/Lab06/lab06-files.zip.
+Before you begin the lab, download the files from: https://github.com/dmgerman/csc116F20labs/raw/master/Lab06/lab06-files.zip.
 Afterwards, extract them into a new folder which you will work from for this lab.
 
 * Why do Classes Exist?
