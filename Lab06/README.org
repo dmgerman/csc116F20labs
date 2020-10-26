@@ -115,7 +115,7 @@ expected behavior of each function. Some of the functions are required to handle
 *After* compiling your source code into an executable called ~clock_exercise~, you can run the test script ~tester1.sh~ to automate 
 testing. Note, ~tester1.sh~ must be marked as executable run, so be sure to run ~chmod +x tester1.sh~ to enable executable privilege.
 
-If you need a refresher on exceptions, see this [[https://github.com/billbird/116f19_Labs/tree/master/Lab04#c-exceptions][previous lab]] 
+If you need a refresher on exceptions, see this [[https://github.com/dmgerman/csc116F20labs/tree/master/Lab04#c-exceptions][previous lab]] 
 for more information on exceptions.
 
 ** Exercise 2: Parsing Times from Strings
