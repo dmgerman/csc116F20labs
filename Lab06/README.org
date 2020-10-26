@@ -1,0 +1,153 @@
+#+TITLE: Lab 06: Classes
+
+* Overview
+
+This lab contains an introduction to classes, and extra practice working with string and exceptions. 
+You will be tasked with implementing functions of a simple class.
+
+* Download the Lab Files
+
+Before you begin the lab, download the files from: https://github.com/billbird/116f19_Labs/raw/master/Lab06/lab06-files.zip.
+Afterwards, extract them into a new folder which you will work from for this lab.
+
+* Why do Classes Exist?
+
+When coding, primitive data types and stand-alone functions often fail to succinctly capture real world concepts. We often enforce 
+structure on data in ways which do not intuitively express the concept we are trying to capture. A great example of this are C-strings. 
+When you read a book, you wouldn't read off the end of the page searching for a null-terminator. Why does our code have to behave this way? 
+It doesn't. 
+
+In C++, the concept of a string is captured in the ~std::string~ class. This class handles all the null-terminator bookkeeping and memory 
+management associated with maintaining a string. Programmers utilizing ~std::string~ are presented exclusively with functionality expected 
+from a string and none of the strange constructs used in its implementation. This notion of *presenting* a high-level conceptual model in 
+favor of a complex low-level model is called *abstraction*. The ~std::string~ class presents an abstraction of a string to programmers.
+
+Classes support programmer defined abstractions. You can abstract concepts important to your program into classes, so you can manipulate 
+these concepts in intuitive ways. A well defined class simplifies the thinking required to utilize the underlying concept in code.
+
+* Classes in C++
+
+Practically speaking, C++ classes are similar to structs in C. Classes can package variables together, however classes can also package 
+functions alongside those variables. These functions manipulate the internal class variables to realize some meaningful result for the 
+class. For example, ~std::string~ has a function called ~substr~ which utilizes the string's internal character array to produce a 
+substring. The variables packaged within a class are called *data members* and the functions packaged within a class are called 
+*function members*.
+
+Classes have access specifiers which enforce that actual users of the class only access certain members of the class. Function members of a 
+class have unrestricted access to all data members of the class. The two primary access specifiers are ~public~ and ~private~. ~public~ 
+members are accessible outside the class by users. ~private~ members are only accessible internally by member functions.
+
+Here is an example of a simple class in C++:
+
+#+BEGIN_SRC C++ 
+#include <iostream>
+
+class Counter 
+{
+public:
+    // Default constructor, initialize c to 0
+    Counter() : c {0} {
+    }
+
+    // Custom constructor, initialize c to initial_count
+    Counter(int initial_count) : c {initial_count} {
+    }
+
+    // Return counter value.
+    int count() {
+        return c;
+    }
+
+    // Increment counter, then return new value
+    int increment() {
+        return ++c;
+    }
+
+    // Reset counter to 0
+    void reset() {
+        c = 0;
+    }
+
+private:
+    // Variables and functions under private can only be accessed
+    // within the classes functions
+    int c;
+};
+
+int main() {
+    Counter C0 {};   // Calls default constructor
+    Counter C1 {5};  // Calls custom constructor (which takes a single int argument)
+    Counter C2(9);   // Calls custom constructor (same as above, alternate notation)
+    
+    C0.increment();
+    std::cout << "C0 Count: " << C0.count() << std::endl;
+
+    C1.increment();
+    std::cout << "C1 Count: " << C1.increment() << std::endl;
+
+    return 0;
+}
+
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+C0 Count: 1
+C1 Count: 7
+#+END_EXAMPLE
+
+A ~struct~ in C++ is equivalent to a ~class~, but with ~public~ as its default access specifier. Classes have default ~private~ access.
+
+Access specifiers, especially ~private~ access, are important for reducing complexity and addressing security concerns. For example, you 
+do not need to know the implementation of ~push_back~ to do the job of inserting an element into the back of a ~std::vector~. Also, by 
+limiting the access to class members, a programmer can not directly change internal data. Imagine if you could directly change the 
+variable storing a vector's size. How could you trust the size of your vector after passing it by reference to some function?
+
+** Exercise 1: Implementing the Clock Interface
+
+The program for this exercise is called ~clock_exercise~. Started code is provided in ~code/clock_exercise.cpp~. 
+The source code contains the definition of a class ~Clock~ that has a number of functions which are missing code. 
+The ~main~ function has two sets of tests, one for each part of this lab.
+
+To pass the Exercise 1 tests, you must correctly implement all of the missing functions *except* the constructor which takes an argument 
+of type ~std::string~ (this constructor is clearly marked as being part of Exercise 2). The comments in ~clock_exercise.cpp~ describe the 
+expected behavior of each function. Some of the functions are required to handle error cases by throwing standard exceptions.
+
+*After* compiling your source code into an executable called ~clock_exercise~, you can run the test script ~tester1.sh~ to automate 
+testing. Note, ~tester1.sh~ must be marked as executable run, so be sure to run ~chmod +x tester1.sh~ to enable executable privilege.
+
+If you need a refresher on exceptions, see this [[https://github.com/billbird/116f19_Labs/tree/master/Lab04#c-exceptions][previous lab]] 
+for more information on exceptions.
+
+** Exercise 2: Parsing Times from Strings
+
+In the same ~clock_exercise.cpp~ source file from Exercise 1, implement the ~Clock( std::string time_string )~ constructor.
+
+This constructor takes a ~std::string~ of the form "hh:mm" (such as ~8:30~ or ~18:10~) and parses the string into a ~Clock~ object. 
+The comment block above the constructor gives a full description of the expected behavior. Remember from Lab 3 you can parse an ~int~ 
+from a string using ~std::stoi~ function. ~std::stoi~ function will throw an ~std::invalid_argument~ exception if it can not parse an ~int~.
+
+Once the missing constructor is added (in addition to the implementations from Exercise 1), all of the automated tests for Exercise 2 
+should pass. Exercise 2 has a different test script ~tester2.sh~ which must also be marked as executable using ~chmod +x tester2.sh~.
+
+** Thought Questions 
+
+In the various ~Clock~ constructors, exceptions are thrown if the provided hour and minute values are invalid. 
+Is there any other way to handle invalid inputs to a constructor, given that constructors cannot have a return value?
+
+Suppose the internal state of the ~Clock~ was stored with only a ~minute~ value, counting minutes from midnight, instead of both ~hour~ 
+and ~minute~ (so instead of storing ~hour = 10~ and ~minute = 30~ for the time ~10:30~, the class would store ~minute = 630~). Assuming 
+the class still had the same set of public functions (with the same names, parameters and behavior), would this change require any 
+modification to ~main()~ or other users of the class?
+
+** What to submit? Sentence Class
+
+At a high level a sentence is a string whose first character is a capital character, each word is separated by a space, and the which 
+ends in a period. In this challenge you will implement the core functions of a sentence class. Starter code is provided in 
+~code/challenge/sentence.cpp~.
+
+Words in the sentence are stored as a vector of strings (~std::vector<std:string>>~). The fact that the first word is capitalized, the last
+word has a period, and all words are separate by spaces is not inherently enforced by ~std::vector<std:string>>~. How will you enforce the 
+structure of a sentence onto the vector of strings?
+
+Should the vector of strings have all words correctly formatted? Should the sentence formatting only be enforced on string and sentence 
+outputs? 
