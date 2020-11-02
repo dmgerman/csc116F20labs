@@ -1,0 +1,189 @@
+#+TITLE: Lab 07: More Classes and Operators
+
+* Overview
+
+This lab reinforces the class and object semantics covered last week, and also introduces operator overloading. 
+The data structure you will implement in this lab is an extension of the matrix material covered in Lab 4.
+
+* Download the Files
+
+Before you begin the lab, download the file lab07-files.zip.
+Afterwards, extract it into a new folder which you will work from for this lab.
+
+* Header and Source Files
+
+Parts 1 and 2 both use the same Matrix class which is separated across the files ~matrix.cpp~ and ~matrix.hpp~. Your
+implementation should be contained entirely in ~matrix.cpp~. ~matrix.hpp~ is a *header file* which defines the Matrix 
+class. Header files contain no implementation details about the information it declares. All implementation is contained 
+in an associated *source file*. For the Matrix class in ~matrix.hpp~, its associated source file is ~matrix.cpp~. 
+
+The source file ~matrix.cpp~ contains only implementation for the Matrix class. The driver code for this lab (the 
+program's main function), is contained in ~lab07.cpp~. To compile the source files ~matrix.cpp~, and ~lab07.cpp~ in the 
+~code~ folder, use the following ~clang++~ command:
+
+#+BEGIN_EXAMPLE
+clang++ -Wall -Wextra -Werror -std=c++17 -o lab07 lab07.cpp matrix.cpp
+#+END_EXAMPLE
+
+Note that you do not have to write ~matrix.hpp~ in the ~clang++~ command. This is because the file and all of its 
+declarations and definitions, are included in ~lab07.cpp~ and ~matrix.cpp~ using the ~#include~ directive.
+
+* The Basic Interface of the Matrix Class
+
+The Matrix class defines a number of member functions which performs expected functionality like printing the matrix, 
+checking if the matrix is diagonal, and computing the trace of the matrix. 
+
+** Exercise 1: Implementing Matrix Member Functions
+
+The task for Exercise 1 is to implement two constructors and seven functions for the ~Matrix~ class. Write implementations 
+of all of the functions in ~matrix.cpp~ until you reach the comment delineating the part 2 material. The material covered 
+in part 1 should be review for you.
+
+You do not need to modify any of the contents in ~lab07.cpp~, or ~matrix.hpp~.
+ 
+Several automated tests have been provided, and should all pass for the corresponding part once your solution is complete 
+for that part. Run ~tester1.sh~ for Exercise 1.
+
+* Operator Overloading
+
+The ~Matrix~ class describes a data structure that represents a mathematical matrix. Recall from linear algebra that 
+various arithmetic operations are defined on matrices.
+
+ - The sum C = A + B of two n \times m matrices is an n \times m matrix C where C_{ij} = A_{ij} + B_{ij}.
+ - The product B = cA, where A is an n \times m matrix and c is a scalar, is defined to be an n \times m matrix where B_{ij} = cA_{ij}.
+ - The product Ac, where c is a scalar, is identical to cA
+
+C++ allows the  +  and * operators to be defined for any type, using *operator overloading*, which allows a function-like 
+syntax to be used to specify operator behavior. By defining  +  and * operators for the ~Matrix~ class, it is possible 
+to use matrices with natural mathematical notation, instead of cumbersome functions like ~add_matrices~ from Lab 4.
+
+** Defining Operators
+
+Almost all operators in C++ can be overloaded for arbitrary types. Wikipedia has a convenient list of all C++ operators and 
+their characteristics at https://en.wikipedia.org/wiki/Operators_in_C_and_C++. An operator in C++ is defined and behaves 
+like a regular function, except with a different notation for the function name. Consider the following function signature, 
+which could be used for a function to compute a product like cA.
+
+#+BEGIN_SRC C++
+Matrix scalar_times_matrix(double c, Matrix A){
+	//...
+}
+#+END_SRC
+
+The same operation could be implemented as a case of the multiplication operator by defining it as ~operator*~:
+
+#+BEGIN_SRC C++
+Matrix operator*(double c, Matrix A){
+	//...
+}
+#+END_SRC
+
+Note that like any other function, an operator may take arguments of any type and return any type. The only special restriction 
+on operators is that you may only overload existing operators (like those in the Wikipedia list above) and that the number of 
+arguments is fixed for example, the + operator is required to take 2 arguments.
+
+There is also no requirement that the types you use for your operators be types you have created. For example, by default, the 
+~std::string~ class does not support adding a string to a numerical value (even though addition of two strings is permitted). 
+You could define an operator which concatenates a string and an integer as follows.
+
+#+BEGIN_SRC C++
+std::string operator+(std::string s, int j){
+	return s + std::to_string(j);
+}
+#+END_SRC
+
+** Operators on Class Types
+
+Consider the simple class ~Point~ below, which represents an (x,y) point in the plane. Note that the data values ~x~ and ~y~ 
+are public, and can be modified by anyone (even functions outside the class).
+
+#+BEGIN_SRC C++
+class Point{
+public:
+	double x, y;
+
+	Point() : x {0.0}, y {0.0} {
+	}
+
+	Point(double x_val, double y_val) : x {x_val}, y {y_val} {
+	}
+	
+	// (Point) + (Point) {Version 1}
+	// Add this point to the provided other point
+	Point operator+(Point other_point) {
+		Point result;
+		result.x = x + other_point.x;
+		result.y = y + other_point.y;
+		return result;
+	}
+	
+};
+#+END_SRC
+
+The + operator is overloaded by the ~operator+~ function inside the ~Point~ class. When an overloaded operator is a member 
+function, the first argument is ~implicitly~ assumed to be the current object. So the + operator above takes two operands: 
+the left operand is the current object and the right operand is provided as the argument ~other_point~. The same operator 
+could also be defined outside the ~Point~ class, in which case it would need to take two arguments:
+
+#+BEGIN_SRC C++
+// (Point) + (Point) {Version 2}
+//Add the points P1 and P2
+//(This function is not part of any class)
+Point operator+(Point P1, Point P2){
+	Point result;
+	result.x = P1.x + P2.x;
+	result.y = P1.y + P2.y;
+	return result;
+}
+#+END_SRC
+
+One advantage of defining operators inside classes is that the operator, as a class member, has full access to the private data of 
+the class. Operators defined outside classes can still be given access to the private members of that class through the use of a 
+~friend~ directive.
+
+Note that the order of operands is significant when overloading operators. Consider the following operator to implement multiplication 
+of a ~Point~ by a scalar.
+
+#+BEGIN_SRC C++
+// (Point)*(double)
+Point operator*(Point P, double s){
+	Point result;
+	result.x = s * P1.x;
+	result.y = s * P1.y;
+	return result;
+}
+#+END_SRC
+
+The operator above would allow code like the following:
+
+#+BEGIN_SRC C++
+Point Q {6, 10};
+Point R = Q * 3;
+#+END_SRC
+
+However the operator would not allow the following:
+
+#+BEGIN_SRC C++
+Point Q {6, 10};
+Point R = 3 * Q;
+#+END_SRC
+
+This is not allowed, because the operator is only defined to take a ~Point~ as the left-hand operand to the * and a scalar as the 
+right-hand operand.
+
+** Exercise 2: Overloading Operators for the Matrix Class
+
+Your task for Exercise 2 is to implement the ~+~, ~-~, ~*~, ~==~ (equality) and ~!=~ (inequality) operators for the ~Matrix~ class.
+When your operators are implemented correctly, the automated tests should all pass.
+
+You may need to add ~friend~ directives for some of the operators if you use private members of the ~Matrix~ class in the operator.
+
+Hint: Observe that some of the operators can be implemented easily by using other operators. For example, the scalar-by-matrix product 
+cA is identical to Ac.
+
+* Thought Questions
+
+- Could the two constructors of ~Matrix~ in Exercise 1 be collapsed into a single constructor while still allowing declarations like 
+~Matrix Q(3,3);~ and ~Matrix R(3,3,10);~?
+- Why is it not possible to define all of the operators in Exercise 2 as part of the ~Matrix~ class (that is, why do some operators have 
+to be defined outside the class scope)?
