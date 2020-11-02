@@ -187,3 +187,7 @@ cA is identical to Ac.
 ~Matrix Q(3,3);~ and ~Matrix R(3,3,10);~?
 - Why is it not possible to define all of the operators in Exercise 2 as part of the ~Matrix~ class (that is, why do some operators have 
 to be defined outside the class scope)?
+
+* What to submit? Rational Class
+Create a class called ~Rational~ for performing arithmetic with fractions. The class represents a fraction by storing the numerator and the denominator as integers, without actually dividing them. The class should support the basic mathematical operation (addition, subtraction, multiplication, and division). Starter code is provided in ~code/challenge/Rational.cpp~.
+
