@@ -1,0 +1,196 @@
+#+TITLE: Lab 08: Inheritance
+
+* Overview
+
+Inheritance is a powerful concept in object-oriented languages. Its basic premise is that a new class can be created
+based on another one. The new class (called the /derived/ class) inherits all members (data and functions alike) 
+of the other class (its /base/ class).
+
+* Download the Files
+
+Before you begin the lab, download the file ~lab08-files.zip~. Afterwards, extract it into a new folder which you will work from for this lab.
+
+* Exercise 1
+
+In ~point.cpp~, implement the ~Point~ class defined in ~point.hpp~. Do not modify the code in ~point.hpp~ or ~part1.cpp~.
+This exercise is a review of the topics from last week with some small but notable additions:
+- We will implement a ~Point~ constructor that takes another ~Point~ object as an argument
+- We overload the ~<<~ operator to allow a ~Point~ to be printed directly to an output stream (like ~cout~).
+
+Compile part 1 with the command:
+
+#+BEGIN_EXAMPLE
+g++ -Wall -Wextra -pedantic -std=c++17 -o part1 part1.cpp point.cpp
+#+END_EXAMPLE
+
+When part 1 is complete, the output of the ~part1~ executable will be:
+
+#+BEGIN_EXAMPLE
+Calling Constructors:
+p0: Point [0, 0]
+p1: Point [1, 1]
+p2: Point [5.9, 0.2]
+p3: Point [0, 0]
+p4: Point [0, 0]
+Performing Operations:
+p3  =  p1: p3 = Point [1, 1]
+p4  = -p1: p4 = Point [-1, -1]
+p1 + p3 = Point [2, 2]
+p1 * 2  = Point [2, 2]
+Computing Distances:
+Distance between p0 and p1 is 1.41421
+Distance between p3 and p4 is 2.82843
+Distance between p4 and p3 is 2.82843
+#+END_EXAMPLE
+
+* Exercise 2
+
+In this exercise, we implement a ~Shape~ class and ~Rectangle~ class. Notice that a rectangle /is/ a shape, and so it is 
+natural to ask any questions about a rectangle that we can ask about a shape. For example:
+- How many vertices (points) does it have?
+- How many sides does it have?
+- What is its area?
+- What is its perimeter?
+
+For all the common traits between shapes and rectangles, we could implement members in the ~Shape~ class and then implement 
+them again in our ~Rectangle~ class. Instead, we are going to use /inheritance/ to allow the ~Rectangle~ class to inherit 
+all (public) members from ~Shape~. In general, inheritance is a useful feature whenever we have an object that /"is an"/ 
+other more general object.
+
+When we implement the ~Rectangle~ class, we have the option to /override/ any inherited members. That is, we can either use 
+the inherited members as they are defined in the super class (the class from we inherit) or implement them anew. By contrast, 
+any ~virtual~ members in the super class /must/ be implemented by a child class.
+
+Open ~shape.hpp~, the declaration for ~Shape~ is:
+
+#+BEGIN_SRC C++
+class Shape {
+public:
+	virtual double area() const = 0;
+	virtual double perimeter() const = 0;
+	virtual Point center() const = 0;
+
+	virtual std::string name() const {
+		return "Shape";
+	}
+};
+#+END_SRC
+
+All shapes must implement ~area~, ~perimeter~, and ~center~.
+
+~name~ simply returns the name of the class, so we should probably update that too.
+
+Open ~rectangle.hpp~
+
+#+BEGIN_SRC C++
+class Rectangle: public Shape {
+public:
+	// Constructors
+	Rectangle(Point const & min, Point const & max);
+	Rectangle(double x, double y, double width, double height);
+	/*
+	 * inherited methods that we need to implement
+	 * or reimplement
+	 */
+	double area() const override;
+	double perimeter() const override;
+	Point center() const override;
+	std::string name() const override;
+
+	// Other methods
+	double width() const;
+	double height() const;
+	Point getMin() const;
+	Point getMax() const;
+
+private:
+	Point mMin;
+	Point mMax;
+};
+#+END_SRC
+
+Rectangle has two constructors, four methods that it overrides from the ~Shape~ class, and four other methods that 
+do not apply to all shapes.
+
+When a class inherits from another class, it has an /is-a/ relationship with that object. In this case, a ~Rectangle~ 
+is a ~Shape~. When a class is composed of an object when it contains member variables of that type. This is called a 
+/has-a/ relationship. In this case, the ~Rectangle~ has a ~Point~, or multiple points.
+
+Open ~rectangle.cpp~ and finish implementing the methods.
+
+Compile part 2 with the command:
+
+#+BEGIN_EXAMPLE
+g++ -Wall -Wextra -pedantic -std=c++17 -o part2 part2.cpp point.cpp rectangle.cpp
+#+END_EXAMPLE
+
+When part 2 is complete, the output of the ~part2~ executable will be:
+
+#+BEGIN_EXAMPLE
+Rectangle type: Rectangle
+Rectangle center: Point [0.5, 1]
+Rectangle dimensions: 1 x 2
+Rectangle min and max: Point [0, 0] and Point [1, 2]
+Rectangle 1 type: Rectangle
+Rectangle 1 center: Point [2, 2.5]
+Rectangle 1 dimensions: 2 x 1
+Rectangle 1 min and max: Point [1, 2] and Point [3, 3]
+#+END_EXAMPLE
+
+* Exercise 3
+
+For this Exercise, you will implement a derived class of ~Rectangle~, the ~Square~. Again, a ~Square~ is a 
+~Rectangle~, and it has points. Because the ~Square~ is a ~Rectangle~, we inherit the members and methods 
+from ~Rectangle~.
+
+#+BEGIN_SRC C++
+class Square : public Rectangle {
+public:
+  Square(Point const & min, double width);
+
+  std::string name() const override {
+    return "Square";
+  }
+};
+#+END_SRC
+
+Your task is to implement the constructor in ~square.cpp~.
+
+Compile part 3 with the command:
+
+#+BEGIN_EXAMPLE
+g++ -Wall -Wextra -pedantic -std=c++17 -o part3 part3.cpp point.cpp rectangle.cpp square.cpp
+#+END_EXAMPLE
+
+When part 3 is complete, the output of the ~part3~ executable will be:
+
+#+BEGIN_EXAMPLE
+Square1 name: Square
+Square1 area: 4
+Square1 dimensions: 2 x 2
+Square1 center: Point [1, 1]
+Square1 min/max: Point [0, 0] Point [2, 2]
+Square2 name: Square
+Square2 area: 9
+Square2 dimensions: 3 x 3
+Square2 center: Point [2.5, 3.5]
+Square2 min/max: Point [1, 2] Point [4, 5]
+#+END_EXAMPLE
+
+* Thought Questions
+
+1. Why does the declaration "~Shape S;~" result in a compilation error?
+2. What is the purpose of virtual methods? How are they different from normal methods?
+3. How does ~Square~ call the ~Rectangle~ constructor of it's base class?
+4. Note how there are calls to the ~area~, ~width~, ~height~ and some other methods in ~part3.cpp~ from square. Where are they defined?
+5. We can call methods defined in the ~Rectangle~ class from ~Square~. Can we call methods defined in the ~Shape~ class from ~Square~?
+
+
+* What to submit? Stack & Queue
+ In this exercise you are supposed to implement stak and queue. Please, first implement Stack using OOP, then make Queue class which inherite Stack and override Pop method.
+
+    - note: use std::vector as Stack container. 
+  
+#+html:<p><strong>If you need more information about stack and queue, click here:</strong> <a href="https://everythingcomputerscience.com/discrete_mathematics/Stacks_and_Queues.html#:~:text=Stack%20is%20a%20container%20of,-out%20(FIFO)%20principle">Stack VS Queue</a></p>
+  
+#+html: <p align="center"><img src="https://4cawmi2va33i3w6dek1d7y1m-wpengine.netdna-ssl.com/wp-content/uploads/2018/07/Computer-science-fundamentals_6.1.png" /></p>
