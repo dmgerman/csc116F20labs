@@ -1,196 +1,272 @@
-#+TITLE: Lab 08: Inheritance
+#+TITLE: Lab 08: Memory Management
 
 * Overview
 
-Inheritance is a powerful concept in object-oriented languages. Its basic premise is that a new class can be created
-based on another one. The new class (called the /derived/ class) inherits all members (data and functions alike) 
-of the other class (its /base/ class).
+An important feature of C++ and C is the ability to explicitly allocate and deallocate memory. This is known as memory management.
+
+C++ supports two main strategies for memory management:
+
+- /Direct memory management/, obsolete in modern C++ but common in legacy code bases.
+- /Smart pointers/, designed to mitigate dangers caused by direct memory management.
 
 * Download the Files
 
-Before you begin the lab, download the file ~lab08-files.zip~. Afterwards, extract it into a new folder which you will work from for this lab.
+Before you begin the lab, download the files from: ~lab08-files.zip~.
+Afterwards, extract them into a new folder which you will work from for this lab.
+
+* Memory Management Basics 
+
+In C, we allocate memory by calling one of ~malloc~, ~calloc~, or ~realloc~, and later we deallocate the memory by calling ~free~. 
+Similarly, in C++, we allocate memory with the keyword ~new~ and deallocate it later with the keyword ~delete~. In both cases, we manage 
+the memory with a /raw pointer/. Working with raw pointers has a lot of inherit dangers and can lead to inexplicable crashes and memory 
+leaks. While the raw pointer capabilities that C++ and C affords the programmer allow some optimizations, its worth sacrificing the witch
+craft for safety and code readability.
+
+** C++ Direct Memory Management
+
+The following is an example of using direct memory management to allocate a buffer of 100 bytes:
+#+BEGIN_SRC C++
+unsigned char *buffer {nullptr};
+// throws exception if not enough memory
+buffer = new char[100];
+
+// do work with buffer
+
+delete buffer;
+#+END_SRC
+
+In the first line a raw pointer called ~buffer~ is initialized as a null pointer. In C we use ~NULL~ to represent and compare against the
+null pointer, in C++ this is replaced with ~nullptr~. In the following line ~new expression~ is used to allocate an array of 100 bytes and
+the resulting pointer is assigned to buffer. Finally, after working with the buffer, ~delete expression~ is called to deallocate buffer's
+memory returning it to the memory pool.
+
+~new expression~ has two unique properties in comparison with C's ~malloc~:
+
+- It will throw an exception in the event of failure to allocate memory. 
+- It will construct each object it allocates, if a constructor exists.
+
+Similar to ~new expression~, ~delete expression~ destructs the object, if a destructor exists, before deallocating the memory.
+
+* Smart Pointers
+
+With direct memory management, the programmer is responsible for writing an associated ~delete~ for every ~new~, which requires keeping
+track of where each object's lifetime should end. This strategy is highly failure prone in complex systems where the point of allocation
+is entirely disjoint from the point of deallocation. In modern C++, programmers can use /smart pointers/ to eliminate the use of raw 
+pointers, ~new~, and ~delete~.
+
+Smart pointers are objects that:
+
+- Perform the memory allocation and construction of the managed object.
+- Control access to the managed object.
+- Destruct the managed object and deallocate its memory at the end of the managed object's lifetime.
+
+Additionally, smart pointers do not allow shady functionality like pointer arithmetic.
+
+** Smart Pointer Classes
+
+There are two smart pointer classes in C++:
+
+- ~std::unique_ptr~, restricts access to manage object such that only one pointer can point to the managed object.
+- ~std::shared_ptr~, allows multiple pointers to point to managed object while still preserving the properties of a smart pointer.
+
+* ~std::shared_ptr~
+
+This lab will concentrate on ~std::shared_ptr~. With the exception of dereferencing, ~std::shared_ptr~ requires different semantics than
+raw pointers. There are three main semantic differences:
+
+- Declaration of ~std::shared_ptr~
+- Assigning a managed object
+- Modifying a managed object
+
+** Declaring a ~std::shared_ptr~
+
+Basic declaration of a ~std::shared_ptr~, where no managed object is provided, allocates no memory.
+
+#+BEGIN_SRC C++
+#include <memory>
+std::shared_ptr<std::string> p1; // pointer to string
+std::shared_ptr<int> p2;         // pointer to int
+std::shared_ptr<std::vector<double>> p3; // pointer to a vector of double
+#+END_SRC
+
+In the examples above, the pointer is created but points to ~nullptr~.
+
+** Allocating ~std::shared_ptr~ Memory
+
+To allocate memory at the time of construction, the programmer is required to provide a pointer to the managed object at the construction
+of the ~std::shared_ptr~.
+
+#+BEGIN_SRC C++
+std::shared_ptr<int> p1 {nullptr}; // p1 points to nullptr
+std::shared_ptr<int> p2 {p1}; // p2 points to the same location as p1
+#+END_SRC
+
+To allocate memory for a ~std::shared_ptr~, programmers should use ~std::make_shared~. This function allocates memory for the managed
+object and calls its constructor (similar in effect to ~new~ in direct memory management):
+
+Examples:
+
+#+BEGIN_SRC C++
+// create a pointer to an integer
+std::shared_ptr<int> p1;
+
+// allocate memory for p1, set it to value 1954
+p1 = std::make_shared<int> {1954};
+
+// create a pointer to a string
+std::shared_ptr<std::string> p2;
+
+p2 = std::make_shared<std::string> {
+    "We must not confuse dissent with disloyalty. \
+    We must remember always that accusation is not proof and that conviction depends upon evidence and due \
+    process of law. We will not walk in fear, one of another. We will not be driven by fear into an age of \
+    unreason, if we dig deep in our history and our doctrine, and remember that we are not descended from \
+    fearful men — not from men who feared to write, to speak, to associate and to defend causes that were, \
+    for the moment, unpopular. ... We can deny our heritage and our history, but we cannot escape \
+    responsibility for the result. There is no way for a citizen of a republic to abdicate his \
+    responsibilities. ... We proclaim ourselves, as indeed we are, the defenders of freedom, wherever it \
+    continues to exist in the world, but we cannot defend freedom abroad by deserting it at home."
+};
+
+// both declare the pointer and allocate its memory
+auto p3 = std::make_shared<std::string> {"-Edward R. Murrow, \"A Report on Senator Joseph R. McCarthy\""};
+#+END_SRC
+
+** Resetting a ~std::shared_ptr~
+
+In general, we do not need to worry about this. The destructor of the ~std::shared_ptr~ object will take care of it for us. If we need to 
+explicitly release the memory pointed by a pointer, we can use ~reset~.
+
+#+BEGIN_SRC C++
+std::shared_ptr<int> p1;
+
+// allocate memory for p1, set it to value 10
+p1 = std::make_shared<int>(10);
+
+//...
+
+// release the memory pointed by p1
+p1.reset();
+#+END_SRC
+
+** Using ~std::shared_ptr~
+
+A ~std::shared_ptr~ is used exactly the same as a regular pointer. It can be /dereferenced/ using the ~*~ operator.
+
+#+BEGIN_SRC C++
+// allocate memory for p1, set it to value 10
+auto p1 = std::make_shared<int>(10);
+
+int i;
+i = *p1;
+std::cout << *p1 ;
+
+// assign to another pointer
+
+std::shared_ptr<int> p2;
+
+p2 = p1;
+#+END_SRC
 
 * Exercise 1
 
-In ~point.cpp~, implement the ~Point~ class defined in ~point.hpp~. Do not modify the code in ~point.hpp~ or ~part1.cpp~.
-This exercise is a review of the topics from last week with some small but notable additions:
-- We will implement a ~Point~ constructor that takes another ~Point~ object as an argument
-- We overload the ~<<~ operator to allow a ~Point~ to be printed directly to an output stream (like ~cout~).
+~part1_list.cpp~ contains a class defining a simple singly-linked-list called ~my_list~, where each node of the list contains a string. 
+Inspect the code. Notice that we create a separate class (called ~list_node~) to represent the nodes of the list.
 
-Compile part 1 with the command:
+Compile to program with:
+~g++ -Wall  -std=c++17 part1_list.cpp -o part1_list~
+
+The node class ~list_node~ consists of two members:
+- The value of the node (which is a string, in our case)
+- A pointer to the next node
+
+The list class ~my_list~ has two pointers: ~head~ points at the beginning of the list and ~tail~ points at the end. It also implements a
+number of functions using direct memory management (i.e. ~new expression~ and ~delete expression~).
+
+| Function Name     | Description                                     |
+|-------------------+-------------------------------------------------|
+| ~empty()~         | Returns true if list is empty, false otherwise. |
+| ~push_front(str)~ | Inserts a string at the front of the list.      |
+| ~push_back(str)~  | Inserts a string at the end of the list.        |
+| ~front()~         | Returns the string at the front of the list.    |
+| ~back()~          | Returns the string at the front of the list.    |
+
+It has two incomplete functions:
+
+| Function Name | Description                                         |
+|---------------+-----------------------------------------------------|
+| ~print()~     | Prints the contents of the list to standard output. |
+| ~exists(str)~ | Returns true if the string str is in the list.       |
+
+Your job is to implement these two functions. Look at the *TODO* comments for more info.
+
+For example, assume that the list is composed of the strings "alpha", "beta", "gamma", "delta". The `print` function should generate the
+following output:
 
 #+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part1 part1.cpp point.cpp
+alpha -> beta -> gamma -> delta
 #+END_EXAMPLE
 
-When part 1 is complete, the output of the ~part1~ executable will be:
-
-#+BEGIN_EXAMPLE
-Calling Constructors:
-p0: Point [0, 0]
-p1: Point [1, 1]
-p2: Point [5.9, 0.2]
-p3: Point [0, 0]
-p4: Point [0, 0]
-Performing Operations:
-p3  =  p1: p3 = Point [1, 1]
-p4  = -p1: p4 = Point [-1, -1]
-p1 + p3 = Point [2, 2]
-p1 * 2  = Point [2, 2]
-Computing Distances:
-Distance between p0 and p1 is 1.41421
-Distance between p3 and p4 is 2.82843
-Distance between p4 and p3 is 2.82843
-#+END_EXAMPLE
+Write the functions and test your code:
+- After compiling, run your program with the provided input test file: ~./part1_list < tests/in/test-01.in > tests/test-01.out~
+- Compare your program's output with the expected output: ~diff -w tests/expected/test-01.expected tests/test-01.out~
 
 * Exercise 2
 
-In this exercise, we implement a ~Shape~ class and ~Rectangle~ class. Notice that a rectangle /is/ a shape, and so it is 
-natural to ask any questions about a rectangle that we can ask about a shape. For example:
-- How many vertices (points) does it have?
-- How many sides does it have?
-- What is its area?
-- What is its perimeter?
+Compile with:
+~g++ -Wall  -std=c++17 part2_list.cpp -o part2_list~
 
-For all the common traits between shapes and rectangles, we could implement members in the ~Shape~ class and then implement 
-them again in our ~Rectangle~ class. Instead, we are going to use /inheritance/ to allow the ~Rectangle~ class to inherit 
-all (public) members from ~Shape~. In general, inheritance is a useful feature whenever we have an object that /"is an"/ 
-other more general object.
-
-When we implement the ~Rectangle~ class, we have the option to /override/ any inherited members. That is, we can either use 
-the inherited members as they are defined in the super class (the class from we inherit) or implement them anew. By contrast, 
-any ~virtual~ members in the super class /must/ be implemented by a child class.
-
-Open ~shape.hpp~, the declaration for ~Shape~ is:
+The provided code is the same as in Part 1. Your job is to rewrite it using smart pointers. For example, this is the declaration of
+~list_node~:
 
 #+BEGIN_SRC C++
-class Shape {
+class list_node {
+    std::string data;
+    list_node *next;
 public:
-	virtual double area() const = 0;
-	virtual double perimeter() const = 0;
-	virtual Point center() const = 0;
+    list_node(std::string _st): data(_st) {};
+    list_node() {};
 
-	virtual std::string name() const {
-		return "Shape";
-	}
+    list_node* get_next();
+    void set_next(list_node *n);
+
+    void set(std::string _st);
+    std::string& get();
 };
 #+END_SRC
 
-All shapes must implement ~area~, ~perimeter~, and ~center~.
-
-~name~ simply returns the name of the class, so we should probably update that too.
-
-Open ~rectangle.hpp~
+It should be rewritten as:
 
 #+BEGIN_SRC C++
-class Rectangle: public Shape {
+class list_node {
+    std::string data;
+    // using a smart pointer to reference the next node in the list
+    std::shared_ptr<list_node> next;
 public:
-	// Constructors
-	Rectangle(Point const & min, Point const & max);
-	Rectangle(double x, double y, double width, double height);
-	/*
-	 * inherited methods that we need to implement
-	 * or reimplement
-	 */
-	double area() const override;
-	double perimeter() const override;
-	Point center() const override;
-	std::string name() const override;
+    list_node(std::string _st): data(_st) {};
+    list_node() {};
 
-	// Other methods
-	double width() const;
-	double height() const;
-	Point getMin() const;
-	Point getMax() const;
+    // using smart pointers as return and arg types
+    std::shared_ptr<list_node> get_next();
+    void set_next(std::shared_ptr<list_node> n);
 
-private:
-	Point mMin;
-	Point mMax;
+    void set(std::string _st);
+    std::string& get();
 };
 #+END_SRC
 
-Rectangle has two constructors, four methods that it overrides from the ~Shape~ class, and four other methods that 
-do not apply to all shapes.
+You should also re-implement the functions ~print~ and ~exists~ to use smart pointers.
 
-When a class inherits from another class, it has an /is-a/ relationship with that object. In this case, a ~Rectangle~ 
-is a ~Shape~. When a class is composed of an object when it contains member variables of that type. This is called a 
-/has-a/ relationship. In this case, the ~Rectangle~ has a ~Point~, or multiple points.
+Update the code and test your code like before; we use the test we used in exercise 1:
+- After compiling, run your program with the provided input test file: ~./part2_list < tests/in/test-01.in > tests/test-01.out~
+- Compare your program's output with the expected output: ~diff -w tests/expected/test-01.expected tests/test-01.out~
 
-Open ~rectangle.cpp~ and finish implementing the methods.
+* Questions
 
-Compile part 2 with the command:
+1. List the three advantages of `std::shared_ptr` pointers over regular pointers.
+2. How many times did you use `delete` in part2 of your assignment?
+3. Do you need to deallocate the memory of the list in its destructor? Why?
 
-#+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part2 part2.cpp point.cpp rectangle.cpp
-#+END_EXAMPLE
-
-When part 2 is complete, the output of the ~part2~ executable will be:
-
-#+BEGIN_EXAMPLE
-Rectangle type: Rectangle
-Rectangle center: Point [0.5, 1]
-Rectangle dimensions: 1 x 2
-Rectangle min and max: Point [0, 0] and Point [1, 2]
-Rectangle 1 type: Rectangle
-Rectangle 1 center: Point [2, 2.5]
-Rectangle 1 dimensions: 2 x 1
-Rectangle 1 min and max: Point [1, 2] and Point [3, 3]
-#+END_EXAMPLE
-
-* Exercise 3
-
-For this Exercise, you will implement a derived class of ~Rectangle~, the ~Square~. Again, a ~Square~ is a 
-~Rectangle~, and it has points. Because the ~Square~ is a ~Rectangle~, we inherit the members and methods 
-from ~Rectangle~.
-
-#+BEGIN_SRC C++
-class Square : public Rectangle {
-public:
-  Square(Point const & min, double width);
-
-  std::string name() const override {
-    return "Square";
-  }
-};
-#+END_SRC
-
-Your task is to implement the constructor in ~square.cpp~.
-
-Compile part 3 with the command:
-
-#+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part3 part3.cpp point.cpp rectangle.cpp square.cpp
-#+END_EXAMPLE
-
-When part 3 is complete, the output of the ~part3~ executable will be:
-
-#+BEGIN_EXAMPLE
-Square1 name: Square
-Square1 area: 4
-Square1 dimensions: 2 x 2
-Square1 center: Point [1, 1]
-Square1 min/max: Point [0, 0] Point [2, 2]
-Square2 name: Square
-Square2 area: 9
-Square2 dimensions: 3 x 3
-Square2 center: Point [2.5, 3.5]
-Square2 min/max: Point [1, 2] Point [4, 5]
-#+END_EXAMPLE
-
-* Thought Questions
-
-1. Why does the declaration "~Shape S;~" result in a compilation error?
-2. What is the purpose of virtual methods? How are they different from normal methods?
-3. How does ~Square~ call the ~Rectangle~ constructor of it's base class?
-4. Note how there are calls to the ~area~, ~width~, ~height~ and some other methods in ~part3.cpp~ from square. Where are they defined?
-5. We can call methods defined in the ~Rectangle~ class from ~Square~. Can we call methods defined in the ~Shape~ class from ~Square~?
-
-
-* What to submit? Stack & Queue
- In this exercise you are supposed to implement stak and queue. Please, first implement Stack using OOP, then make Queue class which inherite Stack and override Pop method.
-
-    - note: use std::vector as Stack container. 
-  
-#+html:<p><strong>If you need more information about stack and queue, click here:</strong> <a href="https://everythingcomputerscience.com/discrete_mathematics/Stacks_and_Queues.html#:~:text=Stack%20is%20a%20container%20of,-out%20(FIFO)%20principle">Stack VS Queue</a></p>
-  
-#+html: <p align="center"><img src="https://4cawmi2va33i3w6dek1d7y1m-wpengine.netdna-ssl.com/wp-content/uploads/2018/07/Computer-science-fundamentals_6.1.png" /></p>
+* What to Submit? Extra Practice
+Add a function ~remove_node(std::string str)~ that removes a node containing a specific string from the list. Consider, how would this be
+different between regular pointers and smart pointers?
