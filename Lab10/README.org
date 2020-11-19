@@ -8,7 +8,7 @@ of the other class (its /base/ class).
 
 * Download the Files
 
-Before you begin the lab, download the file ~lab08-files.zip~. Afterwards, extract it into a new folder which you will work from for this lab.
+Before you begin the lab, download the file ~lab10-files.zip~. Afterwards, extract it into a new folder which you will work from for this lab.
 
 * Exercise 1
 
