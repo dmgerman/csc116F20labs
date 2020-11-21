@@ -1,0 +1,24 @@
+Please enter 1, 2, or 3 to select test.
+1) Sum Vector
+2) Sum Colection
+3) Find matching keys
+K: Grapefruit V:7
+K: Pear V:10
+K: Pineapple V:-10
+K: Pomegranate V:5
+K: Raspberry V:10
+Fruits with price 10: Pear Raspberry 
+
+K: CSC 116 V:CSC 111
+K: MATH 101 V:MATH 100
+K: MATH 122 V:MATH 100
+Courses requiring MATH 100: MATH 101 MATH 122 
+
+K: 66 V:C+
+K: 68 V:C+
+K: 71 V:B-
+K: 87 V:A
+K: 88 V:A
+K: 93 V:A+
+A grades: 87 88 
+

@@ -1,0 +1,16 @@
+Please enter 1, 2, or 3 to select test.
+1) Sum Vector
+2) Sum Colection
+3) Find matching keys
+vector of ints: 6 4 11 9 
+Sum: 30
+
+set of ints: 1 2 3 4 5 
+Sum: 15
+
+vector of strings: Hello - World 
+Sum: Hello-World
+
+set of ints: Pear Pineapple Raspberry 
+Sum: PearPineappleRaspberry
+

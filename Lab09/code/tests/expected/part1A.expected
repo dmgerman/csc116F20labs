@@ -1,0 +1,13 @@
+Please enter 1, 2, or 3 to select test.
+1) Sum Vector
+2) Sum Colection
+3) Find matching keys
+int vector: 6, 4, 11, 9, 
+Sum: 30
+
+float vector: 1.1, 2.2, 6.6, 1, 
+Sum: 10.9
+
+string vector: Hello, -, World, 
+Sum: Hello-World
+
