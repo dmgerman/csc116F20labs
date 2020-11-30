@@ -20,7 +20,7 @@ This exercise is a review of the topics from last week with some small but notab
 Compile part 1 with the command:
 
 #+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part1 part1.cpp point.cpp
+clang++ -Wall -Wextra -pedantic -std=c++17 -o part1 part1.cpp point.cpp
 #+END_EXAMPLE
 
 When part 1 is complete, the output of the ~part1~ executable will be:
@@ -54,7 +54,7 @@ natural to ask any questions about a rectangle that we can ask about a shape. Fo
 
 For all the common traits between shapes and rectangles, we could implement members in the ~Shape~ class and then implement 
 them again in our ~Rectangle~ class. Instead, we are going to use /inheritance/ to allow the ~Rectangle~ class to inherit 
-all (public) members from ~Shape~. In general, inheritance is a useful feature whenever we have an object that /"is an"/ 
+all (public) members from ~Shape~. In general, inheritance is a useful feature whenever we have an object that "/is an/" 
 other more general object.
 
 When we implement the ~Rectangle~ class, we have the option to /override/ any inherited members. That is, we can either use 
@@ -121,7 +121,7 @@ Open ~rectangle.cpp~ and finish implementing the methods.
 Compile part 2 with the command:
 
 #+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part2 part2.cpp point.cpp rectangle.cpp
+clang++ -Wall -Wextra -pedantic -std=c++17 -o part2 part2.cpp point.cpp rectangle.cpp
 #+END_EXAMPLE
 
 When part 2 is complete, the output of the ~part2~ executable will be:
@@ -159,7 +159,7 @@ Your task is to implement the constructor in ~square.cpp~.
 Compile part 3 with the command:
 
 #+BEGIN_EXAMPLE
-g++ -Wall -Wextra -pedantic -std=c++17 -o part3 part3.cpp point.cpp rectangle.cpp square.cpp
+clang++ -Wall -Wextra -pedantic -std=c++17 -o part3 part3.cpp point.cpp rectangle.cpp square.cpp
 #+END_EXAMPLE
 
 When part 3 is complete, the output of the ~part3~ executable will be:
